@@ -7,7 +7,7 @@ local_search = LocalSearch()
 def find_best_with_local_dearch(problem_dimension = 5, optimize_function_name = "De Jong 1st", optimization_function = de_jong_1st_objective_function):
     epochs = problem_dimension*1000
 
-    epoch_results = local_search.fit(optimization_function,(-5.12, 5.12), problem_dimension, epochs, 100, 0.2)
+    epoch_results = local_search.fit(optimization_function, epochs, problem_dimension)
 
     text = create_top_text(epochs, 
                            local_search.best_solution_value, 

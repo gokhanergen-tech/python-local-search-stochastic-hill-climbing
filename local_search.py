@@ -5,17 +5,9 @@ class LocalSearch:
     best_solution = None
     best_solution_value = None
     
-    def fit(self,objective_function, domain, dim, epochs, neighborhood_count, size):
-        min_generate_value, max_generate_value = domain
-        
-        initial_population = np.random.uniform(min_generate_value, max_generate_value, dim)
-        
-        self.best_solution = initial_population
-        self.best_solution_value = objective_function(self.best_solution)
-        
-        radius = size*(max_generate_value-min_generate_value)
-        
-        def calculate_points():
+    def calculate_points(self, neighborhood_count,dim,radius_scale_size, domain):
+            min_generate_value, max_generate_value = domain
+            radius = radius_scale_size*(max_generate_value-min_generate_value)
             axis_values = []
             
             for i in range(dim):
@@ -32,18 +24,34 @@ class LocalSearch:
                 
             return np.vstack(axis_values).transpose()
         
-        epoch_results = []
+    def calculate_initial_solution(self, domain, dim):
+        min_generate_value, max_generate_value = domain
+        return np.random.uniform(min_generate_value, max_generate_value, dim)
+    
+    def fit(self,objective_function, epochs,dim, domain = (-5.12, 5.12), neighborhood_count = 100, radius_scale_size=0.2, type = ""):
+        initial_solution = self.calculate_initial_solution(domain, dim)
+        self.best_solution = initial_solution
+        self.best_solution_value = objective_function(self.best_solution)
         
+        epochs_results = []
+      
         for _ in range(epochs):
-             neighbour_hoods = calculate_points()
-             solutions = np.array([objective_function(np.array(neighborhood)) for neighborhood in neighbour_hoods])
-             best_neighbourhood_index = np.argmin(solutions)
-             best_neighbourhood_value = solutions[best_neighbourhood_index]
+             neighbour_hoods = self.calculate_points(neighborhood_count,dim,radius_scale_size,domain)
+             
+             
+             match type:
+                 case "stochastic_hill_climbing":
+                  selected_neighbourhood_index = np.random.choice(neighborhood_count)
+                  selected_neighbourhood_value = objective_function(neighbour_hoods[selected_neighbourhood_index])
+                 case _:
+                  solutions = np.array([objective_function(np.array(neighborhood)) for neighborhood in neighbour_hoods])
+                  selected_neighbourhood_index = np.argmin(solutions)
+                  selected_neighbourhood_value = solutions[selected_neighbourhood_index]
 
-             if best_neighbourhood_value < self.best_solution_value:
-                 self.best_solution_value  = best_neighbourhood_value
-                 self.best_solution = np.array(neighbour_hoods[best_neighbourhood_index])
-             epoch_results.append(self.best_solution_value)
+             if selected_neighbourhood_value < self.best_solution_value:
+                 self.best_solution_value  = selected_neighbourhood_value
+                 self.best_solution = neighbour_hoods[selected_neighbourhood_index]
+             epochs_results.append(self.best_solution_value)
                  
-                 
-        return epoch_results
+               
+        return epochs_results
