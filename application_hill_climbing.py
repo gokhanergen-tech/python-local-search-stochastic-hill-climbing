@@ -6,9 +6,9 @@ from utils import create_top_text, de_jong_1st_objective_function, de_jong_2nd_r
 local_search = LocalSearch()
 
 def find_best_with_hill_climbing(problem_dimension = 5, optimize_function_name = "De Jong 1st", optimization_function = de_jong_1st_objective_function):
-    epochs = problem_dimension*1000
+    epochs = problem_dimension*10000
 
-    epoch_results = local_search.fit(optimization_function, epochs, problem_dimension,type="stochastic_hill_climbing")
+    epoch_results = local_search.fit(optimization_function, epochs, problem_dimension,algorithm_type="stochastic_hill_climbing")
 
     text = create_top_text(epochs, 
                            local_search.best_solution_value, 
